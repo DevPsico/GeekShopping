@@ -7,6 +7,7 @@ using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using foo.Pages;  // Adicione esta linha
 
 namespace foo.Pages.Consent;
 
@@ -63,7 +64,6 @@ public class Index : PageModel
 
             // emit event
             await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues));
-            Telemetry.Metrics.ConsentDenied(request.Client.ClientId, request.ValidatedResources.ParsedScopes.Select(s => s.ParsedName));
         }
         // user clicked 'yes' - validate the data
         else if (Input.Button == "yes")
@@ -138,7 +138,7 @@ public class Index : PageModel
         }
         else
         {
-            _logger.NoConsentMatchingRequest(returnUrl);
+            _logger.LogWarning("No consent matching request for returnUrl: {ReturnUrl}", returnUrl);
             return false;
         }
     }

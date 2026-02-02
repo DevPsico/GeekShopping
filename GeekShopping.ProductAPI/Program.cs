@@ -23,9 +23,6 @@ builder.Services.AddControllers()
 // 🔧 Registra o repositório de produtos para injeção de dependência
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
-
-
-
 // 🔧 Configura o AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
