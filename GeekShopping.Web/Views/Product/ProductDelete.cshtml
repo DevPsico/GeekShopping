@@ -1,0 +1,14 @@
+﻿@model GeekShopping.Web.Models.ProductModel
+
+<div class="container p-4 border">
+    <h2 class="text-danger">Excluir Produto</h2>
+
+    <form asp-action="ProductDelete" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <p>Tem certeza que deseja excluir o produto <strong>@Model.Name</strong>?</p>
+
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a asp-action="ProductIndex" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
