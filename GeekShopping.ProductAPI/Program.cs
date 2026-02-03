@@ -2,6 +2,7 @@
 using GeekShopping.ProductAPI.Model.Context;
 using GeekShopping.ProductAPI.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<MySQLContext>(options =>
     )
 );
 
+// 🔧 Adiciona os controllers com configuração JSON
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -26,8 +28,35 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 // 🔧 Configura o AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-// 🔧 Adiciona os controllers
-builder.Services.AddControllers();
+// ============================
+// 🔐 CONFIGURAÇÃO DE AUTENTICAÇÃO (IdentityServer)
+// ============================
+// Configura a API para validar tokens JWT emitidos pelo IdentityServer.
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        // URL do IdentityServer (emissor dos tokens)
+        options.Authority = builder.Configuration["IdentityServer:Authority"];
+        
+        // Validação do token
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false // Em produção, valide o audience!
+        };
+    });
+
+// ============================
+// 🛡️ CONFIGURAÇÃO DE AUTORIZAÇÃO
+// ============================
+// Define políticas de acesso baseadas nos scopes do token.
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ApiScope", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("scope", "geek_shopping");
+    });
+});
 
 // 🔧 Adiciona suporte ao Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -45,7 +74,10 @@ if (app.Environment.IsDevelopment())
 // 🔐 Redireciona para HTTPS
 app.UseHttpsRedirection();
 
-// 🔐 Middleware de autorização (pode ser útil com autenticação futuramente)
+// 🔐 Middleware de autenticação (DEVE vir ANTES de Authorization)
+app.UseAuthentication();
+
+// 🔐 Middleware de autorização
 app.UseAuthorization();
 
 // 🔧 Mapeia os endpoints dos controllers
