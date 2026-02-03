@@ -82,8 +82,11 @@ builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 // Serviço customizado para adicionar claims extras ao token (opcional)
 builder.Services.AddScoped<IProfileService, ProfileService>();
 
-// Adiciona suporte a Controllers + Views (Razor)
+// Adiciona suporte a Controllers + Views (MVC)
 builder.Services.AddControllersWithViews();
+
+// ⚠️ IMPORTANTE: Adiciona suporte a Razor Pages (usado pelo IdentityServer para login, consent, etc.)
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
